@@ -1,0 +1,76 @@
+const express = require('express');
+const Transaction = require('../models/Transaction');
+const Product = require('../models/Product');
+const Notification = require('../models/Notification');
+const { protect } = require('../middleware/authMiddleware');
+
+const router = express.Router();
+
+router.get('/', protect, async (req, res) => {
+  try {
+    let transactions;
+    if (req.user.role === 'admin') {
+      transactions = await Transaction.find({}).populate('userId', 'username studentId').populate('productId', 'name image');
+    } else {
+      transactions = await Transaction.find({ userId: req.user.id }).populate('productId', 'name image');
+    }
+    res.json(transactions);
+  } catch (error) {
+    res.status(500).json({ message: error.message });
+  }
+});
+
+router.post('/borrow', protect, async (req, res) => {
+  try {
+    const { productId, returnDate } = req.body;
+    
+    const product = await Product.findById(productId);
+    if (!product) return res.status(404).json({ message: 'Product not found' });
+    if (product.status !== 'available') return res.status(400).json({ message: 'Product is not available' });
+
+    product.status = 'borrowed';
+    await product.save();
+
+    const transaction = new Transaction({
+      userId: req.user.id,
+      productId,
+      returnDate
+    });
+
+    const createdTransaction = await transaction.save();
+    res.status(201).json(createdTransaction);
+  } catch (error) {
+    res.status(500).json({ message: error.message });
+  }
+});
+
+router.post('/return', protect, async (req, res) => {
+  try {
+    const { transactionId } = req.body;
+    const transaction = await Transaction.findById(transactionId).populate('productId');
+    
+    if (!transaction) return res.status(404).json({ message: 'Transaction not found' });
+    if (transaction.status !== 'borrowing' && transaction.status !== 'overdue') {
+      return res.status(400).json({ message: 'Transaction already completed' });
+    }
+
+    if (transaction.userId.toString() !== req.user.id && req.user.role !== 'admin') {
+      return res.status(403).json({ message: 'Not authorized to return this product' });
+    }
+
+    transaction.status = 'returned';
+    await transaction.save();
+
+    const product = await Product.findById(transaction.productId._id);
+    if (product) {
+      product.status = 'available';
+      await product.save();
+    }
+
+    res.json(transaction);
+  } catch (error) {
+    res.status(500).json({ message: error.message });
+  }
+});
+
+module.exports = router;
