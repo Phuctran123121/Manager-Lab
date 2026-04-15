@@ -32,18 +32,21 @@ const importData = async () => {
 
     const products = [
       {
+        productId: 'P001',
         name: 'Oscilloscope',
         description: 'Máy hiện sóng số 100MHz',
         status: 'available',
         image: 'https://via.placeholder.com/150',
       },
       {
+        productId: 'P002',
         name: 'Multimeter',
         description: 'Đồng hồ vạn năng điện tử',
         status: 'borrowed',
         image: 'https://via.placeholder.com/150',
       },
       {
+        productId: 'P003',
         name: 'Function Generator',
         description: 'Máy phát xung tín hiệu',
         status: 'maintenance',

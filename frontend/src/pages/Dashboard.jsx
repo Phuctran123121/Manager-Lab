@@ -1,4 +1,5 @@
 import React, { useEffect, useState } from 'react';
+import { useNavigate } from 'react-router-dom';
 import { Package, Activity, AlertTriangle, CheckCircle, Clock, AlertCircle } from 'lucide-react';
 import { PieChart, Pie, Cell, ResponsiveContainer, Tooltip, Legend } from 'recharts';
 import api from '../api';
@@ -22,6 +23,7 @@ const StatCard = ({ title, value, icon, color }) => (
 
 const Dashboard = () => {
   const { user } = useAuth();
+  const navigate = useNavigate();
   const [products, setProducts] = useState([]);
   const [transactions, setTransactions] = useState([]);
   const [loading, setLoading] = useState(true);
@@ -129,7 +131,16 @@ const Dashboard = () => {
           <h3 style={{ marginBottom: '1rem' }}>{isAdmin ? 'Recent Transactions' : 'My Recent Transactions'}</h3>
           <div style={{ display: 'flex', flexDirection: 'column', gap: '1rem' }}>
             {recentActivities.map((t, idx) => (
-              <div key={idx} style={{ padding: '0.75rem', backgroundColor: 'var(--bg-secondary)', borderRadius: '8px', borderLeft: `4px solid ${t.status === 'borrowing' ? 'var(--warning)' : (t.status === 'overdue' ? 'var(--danger)' : 'var(--success)')}` }}>
+              <div 
+                key={idx} 
+                onClick={() => t.productId?._id && navigate(`/product/${t.productId._id}`)}
+                className="hover-card"
+                style={{ 
+                  padding: '0.75rem', backgroundColor: 'var(--bg-secondary)', borderRadius: '8px', 
+                  borderLeft: `4px solid ${t.status === 'borrowing' ? 'var(--warning)' : (t.status === 'overdue' ? 'var(--danger)' : 'var(--success)')}`,
+                  cursor: 'pointer', transition: 'all 0.2s ease', hover: { opacity: 0.8 }
+                }}
+              >
                 <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '0.25rem' }}>
                   <strong style={{ fontSize: '0.9rem' }}>{t.productId?.name || 'Unknown Device'}</strong>
                   <span style={{ fontSize: '0.75rem', color: 'var(--text-secondary)' }}>

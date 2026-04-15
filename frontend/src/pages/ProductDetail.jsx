@@ -11,26 +11,29 @@ const ProductDetail = () => {
   const [loading, setLoading] = useState(true);
   const [returnDate, setReturnDate] = useState('');
   const [activeTransaction, setActiveTransaction] = useState(null);
+  const [hasOtherActiveTransaction, setHasOtherActiveTransaction] = useState(false);
 
   useEffect(() => {
     fetchProduct();
-  }, [id]);
+  }, [id, user]);
 
   const fetchProduct = async () => {
     try {
       const { data } = await api.get(`/products/${id}`);
       setProduct(data);
 
-      if (data && (data.status === 'borrowed' || data.status === 'overdue')) {
+      if (user) {
          const transRes = await api.get('/transactions');
-         const active = transRes.data.find(t => 
-             (t.productId?._id === data._id || t.productId === data._id) && 
-             (t.status === 'borrowing' || t.status === 'overdue')
+         const activeTransactions = transRes.data.filter(t => t.status === 'borrowing' || t.status === 'overdue');
+         
+         const activeForThisProduct = activeTransactions.find(t => 
+             t.productId?._id === data._id || t.productId === data._id
          );
-         // If a user has borrowed this, `api.get('/transactions')` fetches their personal list so if found it's theirs.
-         // If admin, it fetches all transactions, so we allow admin to also return it on their behalf.
-         if(active) {
-             setActiveTransaction(active);
+         
+         if (activeForThisProduct) {
+             setActiveTransaction(activeForThisProduct);
+         } else if (user?.role === 'user' && activeTransactions.length > 0) {
+             setHasOtherActiveTransaction(true);
          }
       }
 
@@ -122,21 +125,28 @@ const ProductDetail = () => {
           <div style={{ marginTop: '2rem', padding: '1.5rem', background: 'var(--bg-color)', borderRadius: '12px', border: '1px solid var(--border-color)' }}>
             {product.status === 'available' ? (
               user?.role === 'user' ? (
-                <div>
-                  <h3 style={{ marginBottom: '1rem', color: 'var(--primary-color)' }}>Xác nhận thuê thiết bị</h3>
-                  <div className="form-group" style={{ marginBottom: '1.5rem' }}>
-                    <label style={{ fontWeight: 500, marginBottom: '0.5rem', display: 'block' }}>Ngày và Giờ dự kiến trả máy (Expected Return Time)</label>
-                    <input 
-                      type="datetime-local" 
-                      value={returnDate} 
-                      onChange={e => setReturnDate(e.target.value)} 
-                      style={{ padding: '0.75rem', borderRadius: '8px', border: '1px solid var(--border-color)', width: '100%', fontSize: '1rem' }}
-                    />
+                hasOtherActiveTransaction ? (
+                  <div style={{ textAlign: 'center', padding: '1rem', border: '1px dashed var(--danger)', borderRadius: '8px' }}>
+                    <p style={{ color: 'var(--danger)', fontWeight: 600, fontSize: '1.1rem' }}>Vui lòng trả máy đã mượn</p>
+                    <p style={{ color: 'var(--text-secondary)', fontSize: '0.9rem', marginTop: '0.5rem' }}>Theo nguyên tắc, mỗi sinh viên chỉ được phép mượn 1 thiết bị cùng lúc. Hãy hoàn tất trả thiết bị hiện tại trước khi mượn thiết bị mới.</p>
                   </div>
-                  <button className="btn btn-primary" onClick={handleBorrow} style={{ width: '100%', padding: '0.75rem', fontSize: '1.1rem', fontWeight: 600 }}>
-                    Xác nhận Thuê Máy
-                  </button>
-                </div>
+                ) : (
+                  <div>
+                    <h3 style={{ marginBottom: '1rem', color: 'var(--primary-color)' }}>Xác nhận thuê thiết bị</h3>
+                    <div className="form-group" style={{ marginBottom: '1.5rem' }}>
+                      <label style={{ fontWeight: 500, marginBottom: '0.5rem', display: 'block' }}>Ngày và Giờ dự kiến trả máy (Expected Return Time)</label>
+                      <input 
+                        type="datetime-local" 
+                        value={returnDate} 
+                        onChange={e => setReturnDate(e.target.value)} 
+                        style={{ padding: '0.75rem', borderRadius: '8px', border: '1px solid var(--border-color)', width: '100%', fontSize: '1rem' }}
+                      />
+                    </div>
+                    <button className="btn btn-primary" onClick={handleBorrow} style={{ width: '100%', padding: '0.75rem', fontSize: '1.1rem', fontWeight: 600 }}>
+                      Xác nhận Thuê Máy
+                    </button>
+                  </div>
+                )
               ) : (
                 <div style={{ padding: '1rem', border: '1px dashed var(--primary-light)', borderRadius: '8px', textAlign: 'center' }}>
                   <p style={{ color: 'var(--primary-color)', fontWeight: 500 }}>Chỉ dành cho Sinh Viên (Users)</p>
