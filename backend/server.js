@@ -10,6 +10,7 @@ const productRoutes = require('./routes/productRoutes');
 const transactionRoutes = require('./routes/transactionRoutes');
 const notificationRoutes = require('./routes/notificationRoutes');
 const uploadRoutes = require('./routes/uploadRoutes');
+const reservationRoutes = require('./routes/reservationRoutes');
 
 const Transaction = require('./models/Transaction');
 const Product = require('./models/Product');
@@ -33,6 +34,7 @@ app.use('/api/products', productRoutes);
 app.use('/api/transactions', transactionRoutes);
 app.use('/api/notifications', notificationRoutes);
 app.use('/api/upload', uploadRoutes);
+app.use('/api/reservations', reservationRoutes);
 
 app.use('/uploads', express.static(path.join(__dirname, '/uploads')));
 

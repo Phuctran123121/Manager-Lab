@@ -27,7 +27,15 @@ router.get('/:id', async (req, res) => {
     }
 
     if (product) {
-      res.json(product);
+      let productData = product.toObject();
+      if (productData.status === 'borrowed' || productData.status === 'overdue') {
+        const Transaction = require('../models/Transaction');
+        const activeTrans = await Transaction.findOne({ productId: product._id, status: { $in: ['borrowing', 'overdue'] } });
+        if (activeTrans && activeTrans.returnDate) {
+          productData.activeTransactionReturnDate = activeTrans.returnDate;
+        }
+      }
+      res.json(productData);
     } else {
       res.status(404).json({ message: 'Product not found' });
     }
