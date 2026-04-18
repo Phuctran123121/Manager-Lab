@@ -107,6 +107,10 @@ const Products = () => {
     const matchName = p.name.toLowerCase().includes(term);
     const matchId = p.productId ? p.productId.toLowerCase().includes(term) : false;
     return (matchName || matchId) && (filter ? p.status === filter : true);
+  }).sort((a, b) => {
+    if (a.status === 'available' && b.status !== 'available') return -1;
+    if (a.status !== 'available' && b.status === 'available') return 1;
+    return 0;
   });
 
   return (

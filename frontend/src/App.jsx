@@ -18,7 +18,7 @@ const PrivateRoute = ({ children }) => {
 
 const AdminRoute = ({ children }) => {
   const { user } = useAuth();
-  return user && user.role === 'admin' ? children : <Navigate to="/dashboard" />;
+  return user && user.role === 'admin' ? children : <Navigate to="/products" />;
 };
 
 function App() {
@@ -27,15 +27,15 @@ function App() {
       <Router>
         <Routes>
           <Route path="/login" element={<Login />} />
-          <Route path="/" element={<PrivateRoute><Layout /></PrivateRoute>}>
-            <Route index element={<Navigate to="/dashboard" />} />
-            <Route path="dashboard" element={<Dashboard />} />
+          <Route path="/" element={<Layout />}>
+            <Route index element={<Navigate to="/products" />} />
+            <Route path="dashboard" element={<PrivateRoute><Dashboard /></PrivateRoute>} />
             <Route path="products" element={<Products />} />
             <Route path="product/:id" element={<ProductDetail />} />
-            <Route path="transactions" element={<Transactions />} />
+            <Route path="transactions" element={<PrivateRoute><Transactions /></PrivateRoute>} />
             <Route path="users" element={<AdminRoute><Users /></AdminRoute>} />
             <Route path="scanner" element={<Scanner />} />
-            <Route path="profile" element={<Profile />} />
+            <Route path="profile" element={<PrivateRoute><Profile /></PrivateRoute>} />
           </Route>
         </Routes>
       </Router>

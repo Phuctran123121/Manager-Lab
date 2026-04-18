@@ -6,7 +6,7 @@ import { useAuth } from '../context/AuthContext';
 const ProductDetail = () => {
   const { id } = useParams();
   const navigate = useNavigate();
-  const { user } = useAuth();
+  const { user, logout } = useAuth();
   const [product, setProduct] = useState(null);
   const [loading, setLoading] = useState(true);
   const [returnDate, setReturnDate] = useState('');
@@ -124,7 +124,24 @@ const ProductDetail = () => {
           
           <div style={{ marginTop: '2rem', padding: '1.5rem', background: 'var(--bg-color)', borderRadius: '12px', border: '1px solid var(--border-color)' }}>
             {product.status === 'available' ? (
-              user?.role === 'user' ? (
+              !user ? (
+                <div style={{ textAlign: 'center', padding: '1.5rem', border: '1px dashed var(--primary-color)', borderRadius: '8px' }}>
+                  <h3 style={{ marginBottom: '1rem', color: 'var(--primary-color)' }}>Đăng nhập để mượn thiết bị</h3>
+                  <p style={{ color: 'var(--text-secondary)', marginBottom: '1.5rem' }}>Bạn cần đăng nhập bằng tài khoản sinh viên để có thể mượn thiết bị này.</p>
+                  <button className="btn btn-primary" onClick={() => navigate('/login')} style={{ width: '100%', padding: '0.75rem', fontSize: '1.1rem', fontWeight: 600 }}>
+                    Đăng Nhập Ngay
+                  </button>
+                </div>
+              ) : user?.role === 'admin' ? (
+                <div style={{ padding: '1.5rem', border: '1px dashed var(--primary-light)', borderRadius: '8px', textAlign: 'center' }}>
+                  <p style={{ color: 'var(--primary-color)', fontWeight: 500, fontSize: '1.1rem' }}>⚠️ Đang dùng tài khoản Quản Trị (Admin)</p>
+                  <p style={{ fontSize: '0.9rem', color: 'var(--text-secondary)', margin: '1rem 0' }}>Quyền Admin chỉ có thể Quản trị thiết bị, không thể tự thao tác thuê mượn.</p>
+                  <p style={{ fontSize: '0.8rem', color: 'var(--text-light)', marginBottom: '1rem' }}>Nếu bạn đang quét QR trên điện thoại và thấy thông báo này, có thể bạn đã đăng nhập tài khoản Admin vào trình duyệt từ trước.</p>
+                  <button className="btn btn-outline" onClick={() => { logout(); window.location.reload(); }} style={{ width: '100%', padding: '0.5rem', color: 'var(--danger)', borderColor: 'var(--danger)' }}>
+                    Đăng xuất khỏi thiết bị này
+                  </button>
+                </div>
+              ) : (
                 hasOtherActiveTransaction ? (
                   <div style={{ textAlign: 'center', padding: '1rem', border: '1px dashed var(--danger)', borderRadius: '8px' }}>
                     <p style={{ color: 'var(--danger)', fontWeight: 600, fontSize: '1.1rem' }}>Vui lòng trả máy đã mượn</p>
@@ -147,11 +164,6 @@ const ProductDetail = () => {
                     </button>
                   </div>
                 )
-              ) : (
-                <div style={{ padding: '1rem', border: '1px dashed var(--primary-light)', borderRadius: '8px', textAlign: 'center' }}>
-                  <p style={{ color: 'var(--primary-color)', fontWeight: 500 }}>Chỉ dành cho Sinh Viên (Users)</p>
-                  <p style={{ fontSize: '0.875rem', color: 'var(--text-secondary)' }}>Quyền Admin chỉ có thể Quản trị thiết bị, không thể tự thao tác thuê mượn.</p>
-                </div>
               )
             ) : isBorrowedOrOverdue ? (
               activeTransaction ? (
