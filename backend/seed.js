@@ -56,9 +56,9 @@ const importData = async () => {
 
     const insertedProducts = await Product.insertMany(products);
 
-    // After insert, update QR code link based on generated _id
+    // After insert, update QR code link based on productId
     for (const prod of insertedProducts) {
-      prod.qrCode = `http://localhost:3000/product/${prod._id}`;
+      prod.qrCode = `http://localhost:3000/product/${prod.productId}`;
       await prod.save();
     }
 

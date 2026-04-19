@@ -11,9 +11,9 @@ router.get('/', protect, async (req, res) => {
   try {
     let transactions;
     if (req.user.role === 'admin') {
-      transactions = await Transaction.find({}).populate('userId', 'username studentId').populate('productId', 'name image');
+      transactions = await Transaction.find({}).populate('userId', 'username studentId').populate('productId', 'name image productId');
     } else {
-      transactions = await Transaction.find({ userId: req.user.id }).populate('productId', 'name image');
+      transactions = await Transaction.find({ userId: req.user.id }).populate('productId', 'name image productId');
     }
     res.json(transactions);
   } catch (error) {
@@ -23,6 +23,9 @@ router.get('/', protect, async (req, res) => {
 
 router.post('/borrow', protect, async (req, res) => {
   try {
+    if (req.user.role === 'admin') {
+      return res.status(403).json({ message: 'Quyền quản trị không được phép mượn thiết bị' });
+    }
     const { productId, returnDate } = req.body;
     
     const product = await Product.findById(productId);

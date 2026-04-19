@@ -32,9 +32,11 @@ const Sidebar = () => {
             <ArrowRightLeft size={20} /> Transactions
           </NavLink>
         )}
-        <NavLink to="/scanner" className={({ isActive }) => `nav-link ${isActive ? 'active' : ''}`}>
-          <Camera size={20} /> Scan QR
-        </NavLink>
+        {user?.role !== 'admin' && (
+          <NavLink to="/scanner" className={({ isActive }) => `nav-link ${isActive ? 'active' : ''}`}>
+            <Camera size={20} /> Scan QR
+          </NavLink>
+        )}
         {user?.role === 'admin' && (
           <NavLink to="/users" className={({ isActive }) => `nav-link ${isActive ? 'active' : ''}`}>
             <Users size={20} /> Users

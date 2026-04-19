@@ -48,7 +48,7 @@ const Transactions = () => {
     const rows = filteredTransactions.map(t => [
       t.userId?.studentId || 'N/A',
       t.userId?.username || 'N/A',
-      t.productId?.name || 'N/A',
+      `${t.productId?.name || 'N/A'} ${t.productId?.productId ? `(${t.productId.productId})` : ''}`,
       new Date(t.borrowDate).toLocaleString('vi-VN'),
       t.returnDate ? new Date(t.returnDate).toLocaleString('vi-VN') : 'N/A',
       t.status
@@ -73,9 +73,11 @@ const Transactions = () => {
       const studentId = t.userId?.studentId || '';
       const username = t.userId?.username || '';
       const devName = t.productId?.name || '';
+      const devId = t.productId?.productId || '';
       matchSearch = studentId.toLowerCase().includes(searchTerm.toLowerCase()) || 
              username.toLowerCase().includes(searchTerm.toLowerCase()) ||
-             devName.toLowerCase().includes(searchTerm.toLowerCase());
+             devName.toLowerCase().includes(searchTerm.toLowerCase()) ||
+             devId.toLowerCase().includes(searchTerm.toLowerCase());
     }
     
     let matchStatus = true;
@@ -169,7 +171,10 @@ const Transactions = () => {
                     </div>
                   </td>
                 )}
-                <td style={{ fontWeight: 500 }}>{t.productId?.name}</td>
+                <td>
+                  <div style={{ fontWeight: 500 }}>{t.productId?.name}</div>
+                  {t.productId?.productId && <div style={{ fontSize: '0.8rem', color: 'var(--text-secondary)' }}>ID: {t.productId.productId}</div>}
+                </td>
                 <td>{new Date(t.borrowDate).toLocaleString('vi-VN')}</td>
                 <td>{t.returnDate ? new Date(t.returnDate).toLocaleString('vi-VN') : 'N/A'}</td>
                 <td>

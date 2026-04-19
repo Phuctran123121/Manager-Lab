@@ -8,6 +8,9 @@ const router = express.Router();
 
 router.post('/', protect, async (req, res) => {
   try {
+    if (req.user.role === 'admin') {
+      return res.status(403).json({ message: 'Quyền quản trị không được phép đặt thiết bị' });
+    }
     const { productId, reservationDate, expectedReturnDate } = req.body;
     
     const product = await Product.findById(productId);
